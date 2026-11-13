@@ -25,17 +25,23 @@ public class CameraFollow: MonoBehaviour
             return;
         }
         // Determine the starting camera angle from its current position
-        Vector3 pivot = target.position +Vector3.up*lookHeight;
-        Vector3 offset = target.position - pivot;
+        // Vector3 pivot = target.position +Vector3.up*lookHeight;
+        // Vector3 offset = target.position - pivot;
 
-        if (offset.sqrMagnitude>.001f){
-            distance = offset.magnitude;
+        // if (offset.sqrMagnitude>.001f){
+        //     distance = offset.magnitude;
 
-            Vector3 direction = offset.normalized;
+        //     Vector3 direction = offset.normalized;
 
-            yaw = Mathf.Atan2(direction.x, direction.z) * Mathf.Rad2Deg;
-            pitch = Mathf.Asin(direction.y)* Mathf.Rad2Deg;
-        }
+        //     yaw = Mathf.Atan2(direction.x, direction.z) * Mathf.Rad2Deg;
+        //     pitch = Mathf.Asin(direction.y)* Mathf.Rad2Deg;
+        // }
+        // Set the camera's starting rotation
+        transform.rotation = Quaternion.Euler(18.45f, 6.2f, 0f);    
+
+        // Initialize the camera angles
+        pitch = 18.45f;
+        yaw = 6.2f;
     }
     // Late update because we want the camera to follow the player after their action has updated
     void LateUpdate(){
