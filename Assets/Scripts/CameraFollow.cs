@@ -13,7 +13,12 @@ public class CameraFollow: MonoBehaviour
     public float rotationSpeed = 100f;
     public float tiltSpeed = 60f;
     public float positionSmoothness = 5f;
-    //Camera rotation limits
+    // Pan variables so camera auto-pans
+    public float panAmount = 8f;
+    public float panSpeed = 15f;
+    private float currentPan = 0f;
+
+    //Camera rotation limits (up/down)
     public float minTilt = -20f;
     public float maxTilt = 70f;
     // Current camera angles
@@ -51,7 +56,18 @@ public class CameraFollow: MonoBehaviour
         }
         if (Keyboard.current ==null)
             {return;}
-
+        // Detect A/D input for auto-panning
+        float panInput = 0f;
+        // pan if player is moving
+        if (Keyboard.current.aKey.isPressed)
+            panInput -= 1f;
+        if (Keyboard.current.dKey.isPressed)
+            panInput += 1f;
+        //Accumlate camera pan
+        currentPan += panInput * panSpeed * Time.deltaTime;
+        //limit camera pan
+        currentPan = Mathf.Clamp(currentPan, -panAmount, panAmount);
+        
         //J and L rotate the camera left
         if(Keyboard.current.jKey.isPressed)
             yaw -= rotationSpeed * Time.deltaTime;// rotate the yaw left
@@ -75,6 +91,10 @@ public class CameraFollow: MonoBehaviour
         // Calculate desired camera position
         Vector3 desiredPosition = 
            pivot - cameraDirection * distance;
+        // Calculate horizontal direction of camera 
+        Vector3 cameraRight = cameraRotation * Vector3.right;
+        cameraRight.y = 0f;
+        cameraRight.Normalize();
         // Follow the player
         transform.position = Vector3.Lerp(
             transform.position, // The current position
