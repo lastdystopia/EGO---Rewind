@@ -9,10 +9,18 @@ public class CameraFollow: MonoBehaviour
     // Player object for camera to follow
     public Transform target;
     public CameraMode cameraMode = CameraMode.FULL;
+    // Player visibility
+    [Header("Player Visibility")]
+    public float invisibilityDistance = 1.0f;
+
+    private Renderer[] playerRenderers;
+    private bool playerIsInvisible = false;
     //Camera positioning
     public float distance = 6f;
     public float lookHeight = 1.5f;
-
+    [Header("Camera Collision")]
+    public float collisionRadius = .25f; // size of invisible sphere used to detect obstacles
+    public float collisionPadding = .1f; // how far camera stays from surface it hits
     // Camera Movement Speeds
     public float rotationSpeed = 100f;
     public float tiltSpeed = 60f;
@@ -33,8 +41,8 @@ public class CameraFollow: MonoBehaviour
         if (target ==null){
             return;
         }
-        // Determine the starting camera angle from its current position
-       
+        // Get all renderers belonging to player and children
+        playerRenderers = target.GetComponentsInChildren<Renderer>(true);
         // Set the camera's starting rotation
         transform.rotation = Quaternion.Euler(18.45f, 6.2f, 0f);    
 
@@ -72,6 +80,17 @@ public class CameraFollow: MonoBehaviour
         // Calculate desired camera position
         Vector3 desiredPosition = 
            pivot - cameraDirection * distance;
+
+        if (cameraMode == CameraMode.FULL)
+        {
+            float allowedDistance = GetCameraCollisionDistance(pivot, desiredPosition);
+            desiredPosition = pivot - cameraDirection * allowedDistance;
+        }
+        // Hide player if camera gets too close
+        float actualCameraDistance = Vector3.Distance(pivot, desiredPosition);
+        if (cameraMode == CameraMode.FULL)
+            SetPlayerVisibility(actualCameraDistance>invisibilityDistance);
+        else SetPlayerVisibility(true);
         // Calculate horizontal direction of camera 
         Vector3 cameraRight = cameraRotation * Vector3.right;
         cameraRight.y = 0f;
@@ -84,5 +103,61 @@ public class CameraFollow: MonoBehaviour
 
         // Calculate the position the camera should look at = always look at the player
         transform.rotation = Quaternion.LookRotation(pivot-transform.position);
+    }
+    private void SetPlayerVisibility(bool visible)
+    {
+        // // avoid repeatedly enabling or disabling renders
+         if (playerIsInvisible == !visible)
+             return;
+        foreach(Renderer renderer in playerRenderers)
+        {
+            renderer.enabled = visible;
+        }
+
+        playerIsInvisible = !visible;
+    }
+    // Restore visibility if camera is disabled
+    private void OnDisable()
+    {
+        if (playerRenderers ==null)
+            return;
+        foreach (Renderer renderer in playerRenderers)
+        {
+            if (renderer != null)
+                renderer.enabled = true;
+        }
+        playerIsInvisible = false;
+    }
+    // Collision Detection Method
+    private float GetCameraCollisionDistance(Vector3 pivot, Vector3 desiredPosition)
+    {
+        // Direction from player toward intended camera position
+        Vector3 direction = (desiredPosition - pivot).normalized;
+        // Check all solid objects between player and camera
+        RaycastHit[] hits = Physics.SphereCastAll(
+            pivot,
+            collisionRadius,
+            direction, 
+            distance,
+            Physics.AllLayers,
+            QueryTriggerInteraction.Ignore
+        );
+        // start with full camera distance
+        float closestDistance = distance;
+
+        foreach (RaycastHit hit in hits)
+        {
+            // ignore player & its children
+            if (hit.transform == target || hit.transform.IsChildOf(target))
+                continue;
+            // Find closest obstacle
+            if (hit.distance < closestDistance)
+            {
+                closestDistance = hit.distance;
+            }
+
+        }
+        // keep camera slightly away from obstacle
+        return Mathf.Max(0f, closestDistance - collisionPadding);
     }
 }
