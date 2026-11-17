@@ -3,13 +3,19 @@ using UnityEngine.UI;
 using UnityEngine.InputSystem;
 using System;
 using UnityEngine.SceneManagement;
+
 public class MenuController : MonoBehaviour
 {
     // Menu Variables
-    [Header("Menu Buttons")]
-    public Button[] menuButtons;
+    [Header("Menu Options")]
+    public MenuOption[] menuOptions;
+    
+    private  bool horizontalSelectionActive = false;
+
     [Header("Selection")]
     public int selectedIndex = 0;
+    public int selectedHorizontalIndex = 0;
+
     [Header("Selection Highlight")]
     public RectTransform selectionHighlight;
 
@@ -21,11 +27,19 @@ public class MenuController : MonoBehaviour
             return;
         // Move selection around
         if (Keyboard.current.wKey.wasPressedThisFrame){
-            MoveSelection(-1);
+            MoveVertical(-1);
          }
         if (Keyboard.current.sKey.wasPressedThisFrame)
         {
-            MoveSelection(1);
+            MoveVertical(1);
+        }
+        if (Keyboard.current.aKey.wasPressedThisFrame)
+        {
+            MoveHorizontal(-1);   
+        }
+         if (Keyboard.current.dKey.wasPressedThisFrame)
+        {
+            MoveHorizontal(1);
         }
         // Activate Selected button
         if (Keyboard.current.enterKey.wasPressedThisFrame ||
@@ -37,35 +51,91 @@ public class MenuController : MonoBehaviour
     /*
     Moves the selection up or down
     */
-    private void MoveSelection(int direction){
+    private void MoveVertical(int direction){
+        if (menuOptions == null || menuOptions.Length == 0)
+        {
+            return;
+        }
         selectedIndex += direction;
         // Wrap around if we move past the first or last button
         if (selectedIndex < 0)
         {
-            selectedIndex = menuButtons.Length-1;
+            selectedIndex = menuOptions.Length-1;
         }
-        else if (selectedIndex >= menuButtons.Length)
+        else if (selectedIndex >= menuOptions.Length)
         {
             selectedIndex = 0;
+        }
+        horizontalSelectionActive = false;
+        UpdateSelection();
+    }
+    private void MoveHorizontal(int direction)
+    {
+        if (menuOptions == null || menuOptions.Length ==0)
+            return;
+        Button[] horizontalButtons = menuOptions[selectedIndex].horizontalButtons;
+        // If no horizontal buttons, return
+        if (horizontalButtons == null || horizontalButtons.Length ==0)
+            return;
+        // Else, move between them
+        horizontalSelectionActive =true;
+        selectedHorizontalIndex += direction;
+        if (selectedHorizontalIndex < 0)
+        {
+         selectedHorizontalIndex = horizontalButtons.Length-1;   
+        }
+        else if (selectedHorizontalIndex >= horizontalButtons.Length)
+        {
+            selectedHorizontalIndex = 0;
         }
         UpdateSelection();
     }
     public void UpdateSelection()
     {
-        if (menuButtons.Length == 0 || selectionHighlight == null)
-        {
+        if (menuOptions.Length == 0 || menuOptions == null)
             return;
+        Button selectedButton;
+        if (horizontalSelectionActive)
+        {
+            Button[] horizontalButtons = menuOptions[selectedIndex].horizontalButtons;
+            if (horizontalButtons == null || horizontalButtons.Length == 0)
+                return;
+            selectedButton = horizontalButtons[selectedHorizontalIndex];
         }
-        // move- selected highlight position will be the menu's selected index transform position
-        selectionHighlight.position=menuButtons[selectedIndex].transform.position;
+        else
+        {
+            selectedButton = menuOptions[selectedIndex].verticalButton;
+        }
+        if (selectedButton==null)
+            return;
+RectTransform buttonRect =
+    (RectTransform)selectedButton.transform;
+
+selectionHighlight.position = buttonRect.position;        // move- selected highlight position will be the menu's selected index transform position
     }
     public void SelectButton()
     {
-        if (menuButtons.Length == 0)
+        if (menuOptions.Length == 0 || menuOptions ==null)
             return;
         // on click invoke - invokes a click without using mouse key
-
-        menuButtons[selectedIndex].onClick.Invoke();
+        Button selectedButton;
+        if (horizontalSelectionActive)
+        {
+            // Get the horizontal buttons
+            Button[] horizontalButtons = menuOptions[selectedIndex].horizontalButtons;
+            if (horizontalButtons.Length == 0 || horizontalButtons == null)
+                return;
+            // selected button = the button selected in those
+            selectedButton = horizontalButtons[selectedHorizontalIndex];
+        }
+        else
+        {
+            selectedButton = menuOptions[selectedIndex].verticalButton;
+        }
+        if (selectedButton != null)
+        {
+            selectedButton.onClick.Invoke();
+        }
     }
     public void QuitGame()
     {
