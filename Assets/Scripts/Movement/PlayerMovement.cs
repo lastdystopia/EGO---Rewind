@@ -5,6 +5,7 @@ public class PlayerMovement : MonoBehaviour
     // Movement Variables
     public float moveSpeed = 5f;
     public float gravity = -9.81f;
+    public float runSpeedIncrease = 3f;
     // Rotational Variables
     public float rotationSpeed = 720f; // Controls how fast player rotates in degrees per second. Higher = faster
     private CharacterController controller;
@@ -35,7 +36,13 @@ public class PlayerMovement : MonoBehaviour
         //Get WASD input
         Vector2 input = GameInputManager.Instance.MoveInput.ReadValue<Vector2>();
         Vector3 move = cameraForward * input.y + cameraRight*input.x;//new Vector3(input.x, 0f, input.y);
-
+        // Get run input
+    // Get run input
+        bool isRunning = GameInputManager.Instance.RunInput.IsPressed();
+        // Determine current movement speed
+            float currentMoveSpeed = isRunning
+            ? moveSpeed + runSpeedIncrease
+            : moveSpeed;
         // Prevent diagonal movement from being faster
         move = move.normalized; // Takes the movement vector's exact direction while changing its magnitude to 1
         //Update walking animation
@@ -54,9 +61,9 @@ public class PlayerMovement : MonoBehaviour
             );
         }
 
-        // The actual move action - Move the character horizontally
-        controller.Move(move * moveSpeed * Time.deltaTime);
-
+       
+// The actual move action - Move the character horizontally
+        controller.Move(move * currentMoveSpeed * Time.deltaTime);
         // Apply gravity so player doesn't float away
         if (controller.isGrounded && velocity.y < 0)
         {

@@ -19,7 +19,7 @@ public class GameInputManager : MonoBehaviour
     //menu controls
     public InputAction GoBackInput{get; private set;}
     public InputAction OpenMenuInput{get; private set;}
-
+    public InputAction RunInput{get; private set;}
     // Awake
     private void Awake()
     {
@@ -37,6 +37,7 @@ public class GameInputManager : MonoBehaviour
         InteractInput = gameplayMap.FindAction("Interact");
         GoBackInput = gameplayMap.FindAction("GoBack");
         OpenMenuInput = gameplayMap.FindAction("OpenMenu");
+        RunInput = gameplayMap.FindAction("Run");
     }
 private void OnEnable()
     {
