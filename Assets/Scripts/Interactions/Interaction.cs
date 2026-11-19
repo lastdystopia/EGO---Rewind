@@ -26,13 +26,14 @@ public class Interaction : MonoBehaviour
 
     private void Update()
     {
+        // Game input manager
+        bool isEntered = GameInputManager.Instance.InteractInput.WasCompletedThisFrame();
         if (interactionAction == null)
             return;
 
-        if (Keyboard.current != null &&
-            Keyboard.current.spaceKey.wasPressedThisFrame)
+        if (isEntered)
         {
-            Debug.Log("SPACE DETECTED!");
+            Debug.Log("Interaction Detected");
             interactionAction.Invoke();
         }
     }

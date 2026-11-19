@@ -23,30 +23,22 @@ public class MenuController : MonoBehaviour
         UpdateSelection(); // Positions outline around whichever button is initially selected
     }
     private void Update(){
-        if (Keyboard.current == null)
-            return;
-        // Move selection around
-        if (Keyboard.current.wKey.wasPressedThisFrame){
-            MoveVertical(-1);
-         }
-        if (Keyboard.current.sKey.wasPressedThisFrame)
+        Vector2 input = GameInputManager.Instance.MoveInput.ReadValue<Vector2>();
+        if (GameInputManager.Instance.MoveInput.WasPressedThisFrame())
         {
-            MoveVertical(1);
+        int horizontal = -Convert.ToInt32(input.x);
+        int vertical = -Convert.ToInt32(input.y);
+         if (horizontal != 0)
+        MoveHorizontal(horizontal);
+
+        if (vertical != 0)
+        MoveVertical(vertical);
         }
-        if (Keyboard.current.aKey.wasPressedThisFrame)
-        {
-            MoveHorizontal(-1);   
-        }
-         if (Keyboard.current.dKey.wasPressedThisFrame)
-        {
-            MoveHorizontal(1);
-        }
+        bool selectInput = GameInputManager.Instance.InteractInput.WasCompletedThisFrame();
         // Activate Selected button
-        if (Keyboard.current.enterKey.wasPressedThisFrame ||
-        Keyboard.current.spaceKey.wasPressedThisFrame)
-        {
+        if (selectInput)
             SelectButton();
-        }
+        
     }
     /*
     Moves the selection up or down
