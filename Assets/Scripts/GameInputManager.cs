@@ -26,7 +26,7 @@ public class GameInputManager : MonoBehaviour
         Debug.Log("Game input manager initialized");
         if (Instance != null && Instance != this)
         {
-            Destroy(gameObject);
+            Destroy(gameObject); // singleton - if not this instance, remove
             return;
         }
         Instance = this;

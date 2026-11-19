@@ -7,6 +7,8 @@ using UnityEngine.SceneManagement;
 public class MenuController : MonoBehaviour
 {
     // Menu Variables
+    private static string previousSceneName;
+
     [Header("Menu Options")]
     public MenuOption[] menuOptions;
     
@@ -19,6 +21,7 @@ public class MenuController : MonoBehaviour
     [Header("Selection Highlight")]
     public RectTransform selectionHighlight;
 
+    // End Menu Variables
     public void Start(){
         UpdateSelection(); // Positions outline around whichever button is initially selected
     }
@@ -137,8 +140,11 @@ selectionHighlight.position = buttonRect.position;        // move- selected high
         Application.Quit();
         # endif
     }
+
     public void LoadScene(string sceneName)
     {
+        // Remember previous scene
+        previousSceneName = SceneManager.GetActiveScene().name;
         SceneManager.LoadScene(sceneName);
     }
 }
