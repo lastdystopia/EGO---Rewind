@@ -106,7 +106,7 @@ public class MenuController : MonoBehaviour
 RectTransform buttonRect =
     (RectTransform)selectedButton.transform;
 
-selectionHighlight.position = buttonRect.position;        // move- selected highlight position will be the menu's selected index transform position
+    selectionHighlight.position = buttonRect.position;        // move- selected highlight position will be the menu's selected index transform position
     }
     public void SelectButton()
     {
